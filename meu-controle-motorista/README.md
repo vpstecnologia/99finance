@@ -62,3 +62,18 @@ Esta é uma **primeira versão funcional de código**, não um serviço já publ
 - Confirmação de e-mail e RLS são indispensáveis para produção.
 - Somente o SQL Editor, de forma autenticada como proprietário, deve cadastrar o primeiro administrador.
 - Faça testes com dois usuários diferentes para confirmar que um não acessa os registros do outro.
+
+
+## Atualização V2 — Abastecimentos (banco existente)
+
+**Não execute `supabase/schema.sql` novamente no projeto que já está em uso.**
+
+1. Faça um backup do banco no Supabase antes de migrar e preserve sua versão atual publicada.
+2. No Supabase do sistema atual, abra SQL Editor e execute **somente** `supabase/migrations/002_refuelings.sql`.
+3. Atualize os arquivos da aplicação no mesmo repositório GitHub, preservando as variáveis de ambiente já configuradas. Na Vercel, publique novamente.
+4. Teste com seu login o cadastro/edição/exclusão de abastecimentos, o preço sugerido e a visualização do histórico. Teste com um segundo motorista para validar RLS.
+5. Se a consulta a `refuelings` resultar em erro `relation does not exist`, a migração ainda não foi executada no projeto correto.
+
+**Lógica:** o preço do abastecimento mais recente (por data, depois criação) é sugerido para lançamentos novos. Lançamentos anteriores continuam com seu preço salvo. Abastecimentos são fluxo de caixa separado: não são nova despesa no lucro, para não haver desconto duplicado. O custo diário continua km ÷ km/l × preço. O consumo real é medido por ciclos entre abastecimentos de tanque cheio, incluindo abastecimentos parciais no intervalo. Registros fora de ordem ou odômetros incorretos podem invalidar a média. O painel mostra valor e litros abastecidos no período e a última média real válida.
+
+**Nota:** o preço mais recente não sobrescreve automaticamente um formulário diário que já esteja em edição. Use “Cancelar edição” para abrir um novo registro com o preço mais recente.
